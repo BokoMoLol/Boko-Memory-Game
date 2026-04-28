@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Drawing Grid Memory Game</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			font-family: Arial, sans-serif;
+			background: #f4f4f4;
+			color: #222;
+		}
+
+		header {
+			padding: 18px;
+			background: #222;
+			color: white;
+			text-align: center;
+		}
+
+		main {
+			max-width: 1100px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+
+		section {
+			background: white;
+			padding: 18px;
+			border-radius: 12px;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+			margin-bottom: 18px;
+		}
+
+		label {
+			display: block;
+			font-weight: bold;
+			margin-top: 12px;
+		}
+
+		textarea, input, select, button {
+			font: inherit;
+		}
+
+		textarea {
+			width: 100%;
+			height: 170px;
+			padding: 10px;
+			resize: vertical;
+			border: 1px solid #bbb;
+			border-radius: 8px;
+		}
+
+		input, select {
+			padding: 8px;
+			border: 1px solid #bbb;
+			border-radius: 8px;
+			margin-top: 6px;
+			width: 120px;
+		}
+
+		button {
+			border: none;
+			border-radius: 8px;
+			padding: 10px 14px;
+			cursor: pointer;
+			background: #222;
+			color: white;
+			margin-top: 14px;
+		}
+
+		button:hover {
+			background: #444;
+		}
+
+		button.secondary {
+			background: #666;
+		}
+
+		button.danger {
+			background: #a33;
+		}
+
+		.controls {
+			display: flex;
+			gap: 16px;
+			flex-wrap: wrap;
+			align-items: end;
+		}
+
+		.status-bar {
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			flex-wrap: wrap;
+			font-weight: bold;
+			margin-bottom: 12px;
+		}
+
+		.prompt-box {
+			padding: 14px;
+			background: #fff7d6;
+			border: 1px solid #e1c75b;
+			border-radius: 10px;
+			margin-bottom: 14px;
+			font-size: 1.2rem;
+			font-weight: bold;
+			text-align: center;
+		}
+
+		.grid {
+			display: grid;
+			gap: 8px;
+		}
+
+		.cell {
+			position: relative;
+			background: #fff;
+			border: 2px solid #aaa;
+			border-radius: 8px;
+			min-height: 130px;
+			overflow: hidden;
+		}
+
+		.cell.active {
+			border-color: #0077ff;
+			box-shadow: 0 0 0 4px rgba(0, 119, 255, 0.18);
+		}
+
+		.cell.highlight {
+			border-color: #ff9900;
+			box-shadow: 0 0 0 4px rgba(255, 153, 0, 0.25);
+		}
+
+		.cell canvas {
+			width: 100%;
+			height: 100%;
+			display: block;
+			cursor: crosshair;
+		}
+
+		.cell-number {
+			position: absolute;
+			top: 6px;
+			left: 8px;
+			background: rgba(0, 0, 0, 0.65);
+			color: white;
+			padding: 2px 6px;
+			border-radius: 999px;
+			font-size: 0.8rem;
+			pointer-events: none;
+		}
+
+		.hidden {
+			display: none;
+		}
+
+		.quiz-options {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 10px;
+			margin-top: 14px;
+		}
+
+		.quiz-options button {
+			margin: 0;
+			background: #eee;
+			color: #222;
+			border: 1px solid #bbb;
+		}
+
+		.quiz-options button:hover {
+			background: #ddd;
+		}
+
+		.result {
+			font-weight: bold;
+			margin-top: 12px;
+		}
+
+		.good {
+			color: #178a2f;
+		}
+
+		.bad {
+			color: #b22222;
+		}
+
+		.small-note {
+			font-size: 0.92rem;
+			color: #555;
+		}
+
+		.quiz-settings {
+			margin-top: 12px;
+			padding-top: 12px;
+			border-top: 1px solid #ddd;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>Drawing Grid Memory Game</h1>
+		<p>Draw each prompt fast, then test your memory.</p>
+	</header>
+
+	<main>
+		<section id="setupSection">
+			<h2>Setup</h2>
+			<p class="small-note">Put one prompt on each line. You need at least as many prompts as grid spaces.</p>
+
+			<label for="promptInput">Prompts</label>
+			<textarea id="promptInput">cat wearing sunglasses
+rocket ship
+slice of pizza
+haunted house
+smiling cloud
+robot dog
+magic wand
+banana phone
+castle on a hill
+fish with a hat
+alien flower
+sleepy dragon
+cat
+dog
+bird
+fish
+lion
+tiger
+bear
+elephant
+giraffe
+zebra
+monkey
+panda
+penguin
+frog
+snake
+turtle
+rabbit
+hamster
+cow
+pig
+horse
+sheep
+goat
+deer
+wolf
+fox
+bat
+owl
+eagle
+shark
+whale
+dolphin
+octopus
+crab
+lobster
+butterfly
+bee
+ant
+spider
+dragon
+unicorn
+phoenix
+mermaid
+robot
+alien
+ghost
+zombie
+vampire
+witch
+wizard
+knight
+pirate
+ninja
+samurai
+superhero
+villain
+king
+queen
+princess
+castle
+tower
+bridge
+house
+hut
+skyscraper
+school
+library
+hospital
+store
+bakery
+restaurant
+cafe
+park
+playground
+forest
+jungle
+desert
+mountain
+volcano
+island
+beach
+ocean
+river
+waterfall
+lake
+cloud
+rain
+storm
+lightning
+snowman
+sun
+moon
+stars
+planet
+galaxy
+rocket
+spaceship
+satellite
+car
+bus
+train
+subway
+bicycle
+motorcycle
+airplane
+helicopter
+boat
+submarine
+tractor
+firetruck
+ambulance
+police car
+taxi
+truck
+van
+ball
+soccer ball
+basketball
+tennis ball
+baseball
+football
+golf ball
+kite
+balloon
+bubble
+gift box
+present
+cake
+cupcake
+cookie
+pizza
+burger
+hot dog
+sandwich
+fries
+ice cream
+donut
+apple
+banana
+orange
+grape
+watermelon
+strawberry
+pineapple
+carrot
+broccoli
+corn
+egg
+milk
+coffee
+tea
+soda
+bottle
+cup
+plate
+fork
+knife
+spoon
+clock
+watch
+calendar
+book
+notebook
+pencil
+pen
+eraser
+ruler
+backpack
+phone
+laptop
+computer
+keyboard
+mouse
+camera
+tv
+radio
+headphones
+speaker
+lamp
+chair
+table
+bed
+sofa
+mirror
+door
+window
+stairs
+ladder
+umbrella
+hat
+cap
+helmet
+glasses
+sunglasses
+shirt
+pants
+shoes
+boots
+socks
+jacket
+coat
+scarf
+gloves
+ring
+necklace
+bracelet
+crown
+medal
+trophy
+flag
+map
+compass
+treasure chest
+key
+lock
+safe
+money
+coin
+dollar bill
+ticket
+passport
+gift bag
+shopping cart
+basket
+toolbox
+hammer
+screwdriver
+wrench
+drill
+saw
+paintbrush
+palette
+canvas
+easel
+microphone
+guitar
+piano
+drum
+violin
+trumpet
+flute
+saxophone
+stage
+spotlight
+camera tripod
+film reel
+clapperboard
+mask
+costume
+puppet
+doll
+toy car
+toy train
+lego tower
+puzzle
+board game
+dice
+card deck
+chessboard
+checkers
+dominoes
+maze
+labyrinth
+bridge troll
+magic portal
+time machine
+crystal ball
+spell book
+magic potion
+treasure map
+compass rose
+anchor
+ship wheel
+lighthouse
+harbor
+dock
+fishing rod
+net
+bucket
+campfire
+tent
+sleeping bag
+backpack hiking
+binoculars
+flashlight
+lantern
+rope
+cliff
+cave
+mine
+rail tracks
+train station
+airport
+control tower
+runway
+ticket booth
+waiting room
+hotel
+reception desk
+elevator
+escalator
+shopping mall
+food court
+supermarket
+checkout
+barcode
+receipt
+credit card
+atm
+bank
+vault
+security camera
+fingerprint
+robot arm
+factory
+assembly line
+gear
+engine
+battery
+light bulb
+plug
+outlet
+switch
+wire
+circuit
+satellite dish
+antenna
+drone
+vr headset
+game controller
+arcade machine
+pinball machine
+scoreboard
+stadium
+goal post
+basketball hoop
+tennis net
+baseball bat
+helmet sports
+skateboard
+roller skates
+surfboard
+snowboard
+skis
+sled
+parachute
+hot air balloon
+roller coaster
+ferris wheel
+carousel
+amusement park
+ticket ride
+cotton candy
+popcorn
+zoo
+aquarium
+pet shop
+farm
+barn
+tractor field
+windmill
+water wheel
+fountain
+statue
+monument
+museum
+art gallery
+painting frame
+sculpture
+vase
+flower
+rose
+sunflower
+tulip
+tree
+pine tree
+palm tree
+bush
+grass
+leaf
+acorn
+mushroom
+cactus
+log
+stick
+rock
+pebble
+sandcastle
+shell
+starfish
+coral
+wave
+surf
+boat sail
+pirate flag
+treasure island
+map x mark
+compass needle
+north arrow
+city skyline
+street
+traffic light
+crosswalk
+sidewalk
+bench
+trash can
+mailbox
+post office
+delivery truck
+package
+stamp
+letter
+envelope
+notepad
+whiteboard
+chalkboard
+marker
+chalk
+desk
+office chair
+cubicle
+printer
+scanner
+copier
+file cabinet
+folder
+document
+paperclip
+stapler
+rubber band
+calendar wall
+alarm clock
+bedroom
+kitchen
+fridge
+oven
+stove
+sink
+dish
+pan
+pot
+knife set
+cutting board
+spices
+salt shaker
+pepper shaker
+toaster
+microwave
+blender
+mixer
+coffee maker
+dishwasher
+laundry machine
+dryer
+laundry basket
+iron
+ironing board
+bathroom
+toilet
+bathtub
+shower
+towel
+soap
+toothbrush
+toothpaste
+mirror bathroom
+hairbrush
+comb
+razor
+perfume
+makeup kit
+first aid kit
+bandage
+medicine bottle
+thermometer
+stethoscope
+wheelchair
+crutches
+hospital bed
+x-ray
+dna strand
+microscope
+test tube
+beaker
+lab coat
+scientist
+chalk equation
+black hole
+comet
+asteroid
+meteor
+space suit
+moon rover
+saturn rings
+mars rover
+earth globe
+world map
+flag waving
+peace sign
+heart
+smiley face
+thumbs up
+star icon
+check mark
+x mark
+question mark
+exclamation mark
+speech bubble
+thought bubble
+emoji laughing
+emoji crying
+emoji angry
+emoji surprised
+emoji cool
+emoji sleepy
+emoji love
+emoji sick
+emoji robot
+emoji ghost
+emoji alien
+emoji cat
+emoji dog
+emoji unicorn
+emoji pizza
+emoji burger
+emoji cake
+emoji ice cream
+emoji coffee
+emoji sun
+emoji moon
+emoji star
+emoji fire
+emoji snowflake
+emoji rainbow
+rainbow
+pot of gold
+leprechaun
+four leaf clover
+fireworks
+sparkler
+balloon bunch
+party hat
+confetti
+birthday card
+gift ribbon
+cake candles
+wedding cake
+bride
+groom
+ring box
+church
+chapel
+bell
+clock tower
+tower bridge
+city night
+street lamp
+shadow figure
+silhouette
+reflection
+mirror image
+broken glass
+cracked wall
+old book
+ancient scroll
+map parchment
+quill pen
+ink bottle
+treasure chest open
+gold coins
+gemstone
+diamond
+ruby
+emerald
+sapphire
+crystal cave
+magic sword
+shield
+armor
+helmet knight
+dragon egg
+dragon cave
+fire breathing dragon
+ice dragon
+water dragon
+forest spirit
+tree house
+rope swing
+river bridge
+log cabin
+snow cabin
+igloo
+snow mountain
+ski lift
+ice skate
+snowball fight
+winter coat
+scarf blowing
+autumn leaves
+fall tree
+pumpkin
+jack o lantern
+ghost costume
+haunted house
+graveyard
+tombstone
+bat flying
+full moon night
+spider web
+cobweb
+witch hat
+broomstick
+cauldron
+magic sparkles
+fairy
+fairy wings
+enchanted forest
+glowing mushroom
+portal doorway
+time portal
+clock melting
+gear clock
+hourglass
+sand timer
+stopwatch
+timer countdown
+calendar flip
+planner
+schedule
+alarm ringing
+sleeping person
+dream cloud
+thought idea
+lightbulb idea
+brain
+mind map
+question cloud
+puzzle piece
+missing piece
+solution check
+target
+bullseye
+arrow
+bow
+dart board
+score tally
+leaderboard
+trophy winner
+medal gold
+medal silver
+medal bronze
+finish line
+race track
+runner
+sprinter
+marathon
+jump rope
+gym weights
+dumbbell
+barbell
+yoga mat
+meditation pose
+zen garden
+bonsai tree
+tea set
+chopsticks
+sushi
+ramen
+bento box
+fortune cookie
+lantern festival
+dragon dance
+fan
+kimono
+pagoda
+temple
+shrine
+bell temple
+stone path
+garden bridge
+pond koi
+lotus flower
+water lily
+frog pond
+dragonfly
+firefly
+night sky stars
+constellation
+milky way
+space nebula
+cosmic dust
+space station
+control panel
+robot helper
+ai brain
+data cloud
+server rack
+code screen
+binary numbers
+matrix rain
+hacker hood
+lock icon
+shield security
+wifi symbol
+signal bars
+satellite orbit
+rocket launch
+countdown
+blast off
+smoke trail
+parachute landing
+landing gear
+runway lights
+pilot cockpit
+control joystick
+dashboard
+speedometer
+fuel gauge
+map gps
+navigation arrow
+road trip
+mountain road
+desert road
+forest path
+trail sign
+direction sign
+warning sign
+stop sign
+yield sign
+construction sign
+barrier
+cone
+helmet construction
+crane
+bulldozer
+excavator
+cement mixer
+brick wall
+scaffolding
+blueprint
+architect desk
+model house
+mini city
+toy blocks
+stacked cubes
+pyramid
+sphere
+cube
+cone
+cylinder
+torus
+spiral
+wave pattern
+zigzag
+checkerboard
+stripes
+polka dots
+grid pattern
+maze pattern
+optical illusion
+impossible triangle
+infinite stairs
+mirror tunnel
+portal loop
+time loop
+shadow clone
+split mirror
+duplicate figure
+giant vs tiny
+floating island
+upside down house
+gravity flip
+rain upside down
+fire underwater
+ice desert
+lava ocean
+stormy sky
+calm sea
+sunrise
+sunset
+dawn light
+dusk glow
+foggy forest
+misty mountain
+rainbow sky
+cloud city
+sky bridge
+flying car
+hoverboard
+jetpack
+cyborg
+android
+mech robot
+giant robot
+robot battle
+space battle
+laser beam
+force field
+energy shield
+power orb
+magic staff
+spell casting
+light beam
+dark shadow
+hero pose
+villain laugh
+epic duel
+final boss
+victory pose
+defeat pose
+celebration
+crowd cheering
+stage lights
+concert
+band playing
+dj booth
+dance floor
+breakdance
+hip hop
+ballet
+tap dance
+dance pose
+microphone stand
+speaker stack
+sound wave
+music note
+treble clef
+sheet music
+record player
+vinyl record
+cassette tape
+cd disc
+playlist
+headphones on
+listening music
+singing
+karaoke
+podcast mic
+radio tower
+broadcast
+news desk
+camera crew
+film set
+director chair
+script
+storyboard
+comic panel
+speech bubble comic
+superhero comic
+villain comic
+manga face
+anime eyes
+cartoon face
+emoji mashup
+stick figure
+doodle art
+scribble
+abstract art
+color splash
+paint drip
+spray paint
+graffiti wall
+street art
+tag name
+signature
+logo design
+brand icon
+app icon
+website layout
+button ui
+menu bar
+search bar
+profile avatar
+chat bubble
+notification bell
+like button
+heart icon
+share icon
+upload icon
+download icon
+cloud upload
+cloud download
+folder open
+folder closed
+file icon
+zip file
+lock file
+key file
+error sign
+warning triangle
+info icon
+help icon
+settings gear
+user icon
+group icon
+network nodes
+flow chart
+diagram arrows
+process steps
+timeline
+progress bar
+loading spinner
+hourglass loading
+checklist
+task done
+task pending
+calendar event
+reminder bell
+alarm clock ringing
+deadline
+goal flag
+finish flag
+start line
+checkpoint
+map route
+compass navigation
+treasure hunt
+escape room
+mystery box
+locked door
+secret key
+hidden passage
+trap door
+laser grid
+security vault
+spy gadget
+invisible cloak
+night vision
+binoculars zoom
+camera flash
+photo frame
+selfie
+portrait
+landscape photo
+panorama
+snapshot
+memory album
+scrapbook
+sticker
+badge
+award ribbon
+certificate
+diploma
+graduation cap
+school bell
+classroom
+blackboard
+teacher desk
+student desk
+notebook doodle
+homework
+study lamp
+late night study
+coffee mug
+sleepy student
+exam paper
+grade sheet
+report card
+achievement star
+gold star
+motivation quote
+inspiration
+dream big
+never give up
+keep going
+finish strong
+start now
+try again
+learn more
+explore
+discover
+create
+build
+design
+imagine
+draw something random
+draw something funny
+draw something scary
+draw something cute
+draw something tiny
+draw something huge
+draw something fast
+draw something slow
+draw something impossible
+draw your dream
+draw your fear
+draw your pet
+draw your room
+draw your favorite food
+draw your favorite place
+draw your favorite character
+draw your future
+draw your past
+draw yourself
+draw your friend
+draw your family
+draw your house
+draw your city
+draw your planet
+draw your galaxy
+draw your imagination</textarea>
+
+			<div class="controls">
+				<div>
+					<label for="rowsInput">Rows</label>
+					<input id="rowsInput" type="number" min="1" max="10" value="2" />
+				</div>
+
+				<div>
+					<label for="colsInput">Columns</label>
+					<input id="colsInput" type="number" min="1" max="10" value="3" />
+				</div>
+
+				<div>
+					<label for="secondsInput">Seconds per grid</label>
+					<input id="secondsInput" type="number" min="1" max="60" value="5" />
+				</div>
+			</div>
+
+			<div class="quiz-settings">
+				<h3>Quiz Settings</h3>
+				<div class="controls">
+					<div>
+						<label for="quizModeInput">Question mode</label>
+						<select id="quizModeInput" style="width: 220px;">
+							<option value="counts">Custom count for each type</option>
+							<option value="percentages">Total with percentages</option>
+						</select>
+					</div>
+				</div>
+
+				<div id="countSettings" class="controls">
+					<div>
+						<label for="promptToGridCountInput">Prompt → grid questions</label>
+						<input id="promptToGridCountInput" type="number" min="0" max="200" value="5" />
+					</div>
+
+					<div>
+						<label for="gridToPromptCountInput">Grid → prompt questions</label>
+						<input id="gridToPromptCountInput" type="number" min="0" max="200" value="5" />
+					</div>
+				</div>
+
+				<div id="percentageSettings" class="controls hidden">
+					<div>
+						<label for="totalQuestionsInput">Total questions</label>
+						<input id="totalQuestionsInput" type="number" min="1" max="400" value="10" />
+					</div>
+
+					<div>
+						<label for="promptToGridPercentInput">Prompt → grid %</label>
+						<input id="promptToGridPercentInput" type="number" min="0" max="100" value="50" />
+					</div>
+
+					<div>
+						<label for="gridToPromptPercentInput">Grid → prompt %</label>
+						<input id="gridToPromptPercentInput" type="number" min="0" max="100" value="50" />
+					</div>
+				</div>
+				<p class="small-note">If you request more questions than unique grids, the quiz will repeat some prompts.</p>
+			</div>
+
+			<button id="startButton">Start Game</button>
+			<p id="setupError" class="result bad"></p>
+		</section>
+
+		<section id="gameSection" class="hidden">
+			<div class="status-bar">
+				<div id="cellStatus">Grid 1 of 1</div>
+				<div id="timerStatus">Time: 5</div>
+			</div>
+			<div id="promptDisplay" class="prompt-box">Prompt</div>
+			<div id="grid" class="grid"></div>
+			<button id="clearButton" class="secondary">Clear Current Grid</button>
+		</section>
+
+		<section id="quizSection" class="hidden">
+			<h2>Memory Quiz</h2>
+			<p id="quizQuestion"></p>
+			<div id="quizGrid" class="grid"></div>
+			<div id="quizOptions" class="quiz-options"></div>
+			<div id="typedAnswerArea" class="hidden">
+				<label for="typedAnswerInput">Type the prompt</label>
+				<input id="typedAnswerInput" type="text" style="width: 100%;" autocomplete="off" />
+				<button id="submitTypedAnswerButton">Submit Answer</button>
+			</div>
+			<p id="quizResult" class="result"></p>
+			<button id="nextQuizButton" class="hidden">Next Question</button>
+			<button id="restartButton" class="danger">Restart</button>
+		</section>
+	</main>
+
+	<script>
+		const setupSection = document.getElementById("setupSection");
+		const gameSection = document.getElementById("gameSection");
+		const quizSection = document.getElementById("quizSection");
+		const promptInput = document.getElementById("promptInput");
+		const rowsInput = document.getElementById("rowsInput");
+		const colsInput = document.getElementById("colsInput");
+		const secondsInput = document.getElementById("secondsInput");
+		const quizModeInput = document.getElementById("quizModeInput");
+		const countSettings = document.getElementById("countSettings");
+		const percentageSettings = document.getElementById("percentageSettings");
+		const promptToGridCountInput = document.getElementById("promptToGridCountInput");
+		const gridToPromptCountInput = document.getElementById("gridToPromptCountInput");
+		const totalQuestionsInput = document.getElementById("totalQuestionsInput");
+		const promptToGridPercentInput = document.getElementById("promptToGridPercentInput");
+		const gridToPromptPercentInput = document.getElementById("gridToPromptPercentInput");
+		const startButton = document.getElementById("startButton");
+		const clearButton = document.getElementById("clearButton");
+		const restartButton = document.getElementById("restartButton");
+		const setupError = document.getElementById("setupError");
+		const cellStatus = document.getElementById("cellStatus");
+		const timerStatus = document.getElementById("timerStatus");
+		const promptDisplay = document.getElementById("promptDisplay");
+		const grid = document.getElementById("grid");
+		const quizGrid = document.getElementById("quizGrid");
+		const quizQuestion = document.getElementById("quizQuestion");
+		const quizOptions = document.getElementById("quizOptions");
+		const typedAnswerArea = document.getElementById("typedAnswerArea");
+		const typedAnswerInput = document.getElementById("typedAnswerInput");
+		const submitTypedAnswerButton = document.getElementById("submitTypedAnswerButton");
+		const quizResult = document.getElementById("quizResult");
+		const nextQuizButton = document.getElementById("nextQuizButton");
+
+		let rows = 2;
+		let cols = 3;
+		let secondsPerCell = 5;
+		let currentCell = 0;
+		let prompts = [];
+		let usedPrompts = [];
+		let canvases = [];
+		let timer = null;
+		let timeLeft = 5;
+		let drawing = false;
+		let quizQuestions = [];
+		let quizIndex = 0;
+		let score = 0;
+
+		quizModeInput.addEventListener("change", updateQuizSettingsVisibility);
+		startButton.addEventListener("click", startGame);
+		clearButton.addEventListener("click", clearCurrentCanvas);
+		restartButton.addEventListener("click", restartGame);
+		nextQuizButton.addEventListener("click", showNextQuizQuestion);
+		submitTypedAnswerButton.addEventListener("click", function() {
+			checkAnswer(typedAnswerInput.value);
+		});
+		typedAnswerInput.addEventListener("keydown", function(event) {
+			if (event.key === "Enter") {
+				checkAnswer(typedAnswerInput.value);
+			}
+		});
+
+		function updateQuizSettingsVisibility() {
+			if (quizModeInput.value === "counts") {
+				countSettings.classList.remove("hidden");
+				percentageSettings.classList.add("hidden");
+			} else {
+				countSettings.classList.add("hidden");
+				percentageSettings.classList.remove("hidden");
+			}
+		}
+
+		function startGame() {
+			setupError.textContent = "";
+			rows = parseInt(rowsInput.value, 10);
+			cols = parseInt(colsInput.value, 10);
+			secondsPerCell = parseInt(secondsInput.value, 10);
+			prompts = promptInput.value.split("\n").map(function(prompt) {
+				return prompt.trim();
+			}).filter(function(prompt) {
+				return prompt.length > 0;
+			});
+
+			const totalCells = rows * cols;
+
+			if (!rows || !cols || rows < 1 || cols < 1) {
+				setupError.textContent = "Rows and columns must be at least 1.";
+				return;
+			}
+
+			if (!secondsPerCell || secondsPerCell < 1) {
+				setupError.textContent = "Seconds per grid must be at least 1.";
+				return;
+			}
+
+			if (prompts.length < totalCells) {
+				setupError.textContent = "You need at least " + totalCells + " prompts for this grid.";
+				return;
+			}
+
+			const quizSettingsError = validateQuizSettings();
+
+			if (quizSettingsError.length > 0) {
+				setupError.textContent = quizSettingsError;
+				return;
+			}
+
+			usedPrompts = shuffle(prompts).slice(0, totalCells);
+			currentCell = 0;
+			canvases = [];
+			setupSection.classList.add("hidden");
+			quizSection.classList.add("hidden");
+			gameSection.classList.remove("hidden");
+			createDrawingGrid();
+			startCellTurn();
+		}
+
+		function createDrawingGrid() {
+			grid.innerHTML = "";
+			grid.style.gridTemplateColumns = "repeat(" + cols + ", 1fr)";
+
+			for (let i = 0; i < rows * cols; i++) {
+				const cell = document.createElement("div");
+				const canvas = document.createElement("canvas");
+				const number = document.createElement("div");
+
+				cell.className = "cell";
+				number.className = "cell-number";
+				number.textContent = i + 1;
+
+				cell.appendChild(canvas);
+				cell.appendChild(number);
+				grid.appendChild(cell);
+				canvases.push(canvas);
+				prepareCanvas(canvas);
+			}
+		}
+
+		function prepareCanvas(canvas) {
+			resizeCanvas(canvas);
+
+			canvas.addEventListener("mousedown", function(event) {
+				if (!isActiveCanvas(canvas)) {
+					return;
+				}
+				drawing = true;
+				draw(event, canvas);
+			});
+
+			canvas.addEventListener("mousemove", function(event) {
+				if (!drawing || !isActiveCanvas(canvas)) {
+					return;
+				}
+				draw(event, canvas);
+			});
+
+			canvas.addEventListener("mouseup", function() {
+				drawing = false;
+			});
+
+			canvas.addEventListener("mouseleave", function() {
+				drawing = false;
+			});
+
+			canvas.addEventListener("touchstart", function(event) {
+				if (!isActiveCanvas(canvas)) {
+					return;
+				}
+				event.preventDefault();
+				drawing = true;
+				drawTouch(event, canvas);
+			});
+
+			canvas.addEventListener("touchmove", function(event) {
+				if (!drawing || !isActiveCanvas(canvas)) {
+					return;
+				}
+				event.preventDefault();
+				drawTouch(event, canvas);
+			});
+
+			canvas.addEventListener("touchend", function() {
+				drawing = false;
+			});
+		}
+
+		function resizeCanvas(canvas) {
+			const rect = canvas.parentElement.getBoundingClientRect();
+			canvas.width = Math.max(1, rect.width);
+			canvas.height = Math.max(1, rect.height);
+		}
+
+		function isActiveCanvas(canvas) {
+			return canvases[currentCell] === canvas && gameSection.classList.contains("hidden") === false;
+		}
+
+		function draw(event, canvas) {
+			const rect = canvas.getBoundingClientRect();
+			const x = event.clientX - rect.left;
+			const y = event.clientY - rect.top;
+			drawPoint(canvas, x, y);
+		}
+
+		function drawTouch(event, canvas) {
+			const touch = event.touches[0];
+			const rect = canvas.getBoundingClientRect();
+			const x = touch.clientX - rect.left;
+			const y = touch.clientY - rect.top;
+			drawPoint(canvas, x, y);
+		}
+
+		function drawPoint(canvas, x, y) {
+			const context = canvas.getContext("2d");
+			context.fillStyle = "black";
+			context.beginPath();
+			context.arc(x, y, 4, 0, Math.PI * 2);
+			context.fill();
+		}
+
+		function startCellTurn() {
+			const totalCells = rows * cols;
+			const cells = grid.querySelectorAll(".cell");
+
+			for (let i = 0; i < cells.length; i++) {
+				cells[i].classList.remove("active");
+			}
+
+			if (currentCell >= totalCells) {
+				finishDrawingRound();
+				return;
+			}
+
+			cells[currentCell].classList.add("active");
+			cellStatus.textContent = "Grid " + (currentCell + 1) + " of " + totalCells;
+			promptDisplay.textContent = usedPrompts[currentCell];
+			timeLeft = secondsPerCell;
+			timerStatus.textContent = "Time: " + timeLeft;
+
+			clearInterval(timer);
+			timer = setInterval(function() {
+				timeLeft--;
+				timerStatus.textContent = "Time: " + timeLeft;
+
+				if (timeLeft <= 0) {
+					clearInterval(timer);
+					drawing = false;
+					currentCell++;
+					startCellTurn();
+				}
+			}, 1000);
+		}
+
+		function clearCurrentCanvas() {
+			if (!canvases[currentCell]) {
+				return;
+			}
+
+			const canvas = canvases[currentCell];
+			const context = canvas.getContext("2d");
+			context.clearRect(0, 0, canvas.width, canvas.height);
+		}
+
+		function finishDrawingRound() {
+			clearInterval(timer);
+			gameSection.classList.add("hidden");
+			quizSection.classList.remove("hidden");
+			makeQuizQuestions();
+			quizIndex = 0;
+			score = 0;
+			showQuizQuestion();
+		}
+
+		function validateQuizSettings() {
+			if (quizModeInput.value === "counts") {
+				const promptToGridCount = parseInt(promptToGridCountInput.value, 10);
+				const gridToPromptCount = parseInt(gridToPromptCountInput.value, 10);
+
+				if (isNaN(promptToGridCount) || isNaN(gridToPromptCount) || promptToGridCount < 0 || gridToPromptCount < 0) {
+					return "Question counts must be 0 or more.";
+				}
+
+				if (promptToGridCount + gridToPromptCount < 1) {
+					return "You need at least 1 quiz question.";
+				}
+			} else {
+				const totalQuestions = parseInt(totalQuestionsInput.value, 10);
+				const promptToGridPercent = parseInt(promptToGridPercentInput.value, 10);
+				const gridToPromptPercent = parseInt(gridToPromptPercentInput.value, 10);
+
+				if (isNaN(totalQuestions) || totalQuestions < 1) {
+					return "Total questions must be at least 1.";
+				}
+
+				if (isNaN(promptToGridPercent) || isNaN(gridToPromptPercent) || promptToGridPercent < 0 || gridToPromptPercent < 0) {
+					return "Percentages must be 0 or more.";
+				}
+
+				if (promptToGridPercent + gridToPromptPercent !== 100) {
+					return "Question type percentages must add up to 100.";
+				}
+			}
+
+			return "";
+		}
+
+		function makeQuizQuestions() {
+			let promptToGridCount = 0;
+			let gridToPromptCount = 0;
+
+			quizQuestions = [];
+
+			if (quizModeInput.value === "counts") {
+				promptToGridCount = parseInt(promptToGridCountInput.value, 10);
+				gridToPromptCount = parseInt(gridToPromptCountInput.value, 10);
+			} else {
+				const totalQuestions = parseInt(totalQuestionsInput.value, 10);
+				const promptToGridPercent = parseInt(promptToGridPercentInput.value, 10);
+
+				promptToGridCount = Math.round(totalQuestions * promptToGridPercent / 100);
+				gridToPromptCount = totalQuestions - promptToGridCount;
+			}
+
+			quizQuestions = quizQuestions.concat(makeQuestionsOfType("promptToGrid", promptToGridCount));
+			quizQuestions = quizQuestions.concat(makeQuestionsOfType("gridToPrompt", gridToPromptCount));
+			quizQuestions = shuffle(quizQuestions);
+		}
+
+		function makeQuestionsOfType(type, count) {
+			const questions = [];
+			let indexes = [];
+
+			for (let i = 0; i < usedPrompts.length; i++) {
+				indexes.push(i);
+			}
+
+			while (questions.length < count) {
+				const shuffledIndexes = shuffle(indexes);
+
+				for (let i = 0; i < shuffledIndexes.length && questions.length < count; i++) {
+					const promptIndex = shuffledIndexes[i];
+
+					questions.push({
+						type: type,
+						prompt: usedPrompts[promptIndex],
+						answer: promptIndex
+					});
+				}
+			}
+
+			return questions;
+		}
+
+		function showQuizQuestion() {
+			quizResult.textContent = "";
+			quizResult.className = "result";
+			nextQuizButton.classList.add("hidden");
+			quizOptions.innerHTML = "";
+			typedAnswerArea.classList.add("hidden");
+			typedAnswerInput.value = "";
+			createQuizGrid();
+
+			if (quizIndex >= quizQuestions.length) {
+				quizQuestion.textContent = "Done! Score: " + score + " / " + quizQuestions.length;
+				quizGrid.innerHTML = "";
+				quizOptions.innerHTML = "";
+				return;
+			}
+
+			const question = quizQuestions[quizIndex];
+
+			if (question.type === "promptToGrid") {
+				quizQuestion.textContent = "Which grid did you draw for this prompt: \"" + question.prompt + "\"?";
+				quizGrid.addEventListener("click", handleGridChoice);
+			} else {
+				quizQuestion.textContent = "What was the prompt for the highlighted grid?";
+				const cells = quizGrid.querySelectorAll(".cell");
+				cells[question.answer].classList.add("highlight");
+				typedAnswerArea.classList.remove("hidden");
+				setTimeout(function() {
+					typedAnswerInput.focus();
+				}, 0);
+			}
+		}
+
+		function createQuizGrid() {
+			quizGrid.innerHTML = "";
+			quizGrid.style.gridTemplateColumns = "repeat(" + cols + ", 1fr)";
+			const totalCells = rows * cols;
+
+			for (let i = 0; i < totalCells; i++) {
+				const cell = document.createElement("div");
+				const canvas = document.createElement("canvas");
+				const number = document.createElement("div");
+
+				cell.className = "cell";
+				cell.dataset.index = i;
+				number.className = "cell-number";
+				number.textContent = i + 1;
+
+				cell.appendChild(canvas);
+				cell.appendChild(number);
+				quizGrid.appendChild(cell);
+
+				setTimeout(function() {
+					resizeCanvas(canvas);
+					const context = canvas.getContext("2d");
+					context.drawImage(canvases[i], 0, 0, canvas.width, canvas.height);
+				}, 0);
+			}
+		}
+
+		function handleGridChoice(event) {
+			const chosenCell = event.target.closest(".cell");
+
+			if (!chosenCell || nextQuizButton.classList.contains("hidden") === false) {
+				return;
+			}
+
+			const chosenIndex = parseInt(chosenCell.dataset.index, 10);
+			checkAnswer(chosenIndex);
+		}
+
+		function checkAnswer(answer) {
+			const question = quizQuestions[quizIndex];
+			let correct = false;
+
+			if (question.type === "promptToGrid") {
+				correct = answer === question.answer;
+			} else {
+				correct = normalizeAnswer(answer) === normalizeAnswer(question.prompt);
+			}
+
+			if (correct) {
+				score++;
+				quizResult.textContent = "Correct!";
+				quizResult.className = "result good";
+			} else {
+				quizResult.textContent = "Wrong. The answer was grid " + (question.answer + 1) + ": " + question.prompt;
+				quizResult.className = "result bad";
+			}
+
+			nextQuizButton.classList.remove("hidden");
+		}
+
+		function normalizeAnswer(answer) {
+			return answer.trim().toLowerCase();
+		}
+
+		function showNextQuizQuestion() {
+			quizIndex++;
+			showQuizQuestion();
+		}
+
+		function restartGame() {
+			clearInterval(timer);
+			setupSection.classList.remove("hidden");
+			gameSection.classList.add("hidden");
+			quizSection.classList.add("hidden");
+		}
+
+		function shuffle(array) {
+			const copy = array.slice();
+
+			for (let i = copy.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				const temp = copy[i];
+				copy[i] = copy[j];
+				copy[j] = temp;
+			}
+
+			return copy;
+		}
+	</script>
+</body>
+</html>
